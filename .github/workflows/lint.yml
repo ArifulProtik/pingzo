@@ -1,0 +1,37 @@
+name: CI
+on:
+  push:
+    branches:
+      - main
+  pull_request:
+
+jobs:
+  lint:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Setup Bun
+        # Use the official action from oven-sh
+        uses: oven-sh/setup-bun@v2
+        with:
+          # Optionally specify a version
+          bun-version: latest
+      
+      # Recommended action for caching within Turborepo
+      - name: Setup Turborepo caching
+        uses: rharkor/caching-for-turbo@v1
+        with:
+          # This action automatically sets up a cache server
+          # and configures environment variables for Turborepo
+          cache-server-url: ${{ steps.turbo-cache-server.outputs.url }}
+          cache-server-token: ${{ steps.turbo-cache-server.outputs.token }}
+
+      - name: Install dependencies with Bun
+        # This will create a bun.lockb file and install dependencies
+        run: bun install
+
+      - name: Running lint
+        # Run your build command using 'bun run'
+        run: bun run lint
