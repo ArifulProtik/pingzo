@@ -8,18 +8,29 @@
 	"root": false,
 	"files": {
 		"ignoreUnknown": false,
-		"includes": ["**/src/**/*"]
+		"includes": [
+			"**/src/**/*",
+			"!**/src/common/database/migrations/**/*"
+		]
 	},
 	"formatter": {
 		"enabled": true,
-		"indentStyle": "tab",
-		"indentWidth": 4
+		"indentStyle": "space",
+		"indentWidth": 2
 	},
 	"linter": {
 		"enabled": true,
 		"rules": {
 			"recommended": true,
-			"style": "warn"
+			"style": {
+				
+				"useFilenamingConvention": {
+					"level": "error",
+					"options": {
+						"filenameCases": ["camelCase"]
+					}
+				}
+			}
 		}
 	},
 	"javascript": {

@@ -9,50 +9,137 @@
 // Additionally, you should also exclude this file from your linter and/or formatter to prevent it from being checked or modified.
 
 import { Route as rootRouteImport } from './routes/__root'
-import { Route as IndexRouteImport } from './routes/index'
+import { Route as SignupRouteImport } from './routes/signup'
+import { Route as SigninRouteImport } from './routes/signin'
+import { Route as MainIndexRouteImport } from './routes/_main/index'
+import { Route as MainChatRouteRouteImport } from './routes/_main/chat/route'
+import { Route as MainChatIndexRouteImport } from './routes/_main/chat/index'
 
-const IndexRoute = IndexRouteImport.update({
-  id: '/',
+const SignupRoute = SignupRouteImport.update({
+  id: '/signup',
+  path: '/signup',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const SigninRoute = SigninRouteImport.update({
+  id: '/signin',
+  path: '/signin',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const MainIndexRoute = MainIndexRouteImport.update({
+  id: '/_main/',
   path: '/',
   getParentRoute: () => rootRouteImport,
 } as any)
+const MainChatRouteRoute = MainChatRouteRouteImport.update({
+  id: '/_main/chat',
+  path: '/chat',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const MainChatIndexRoute = MainChatIndexRouteImport.update({
+  id: '/',
+  path: '/',
+  getParentRoute: () => MainChatRouteRoute,
+} as any)
 
 export interface FileRoutesByFullPath {
-  '/': typeof IndexRoute
+  '/signin': typeof SigninRoute
+  '/signup': typeof SignupRoute
+  '/chat': typeof MainChatRouteRouteWithChildren
+  '/': typeof MainIndexRoute
+  '/chat/': typeof MainChatIndexRoute
 }
 export interface FileRoutesByTo {
-  '/': typeof IndexRoute
+  '/signin': typeof SigninRoute
+  '/signup': typeof SignupRoute
+  '/': typeof MainIndexRoute
+  '/chat': typeof MainChatIndexRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
-  '/': typeof IndexRoute
+  '/signin': typeof SigninRoute
+  '/signup': typeof SignupRoute
+  '/_main/chat': typeof MainChatRouteRouteWithChildren
+  '/_main/': typeof MainIndexRoute
+  '/_main/chat/': typeof MainChatIndexRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
-  fullPaths: '/'
+  fullPaths: '/signin' | '/signup' | '/chat' | '/' | '/chat/'
   fileRoutesByTo: FileRoutesByTo
-  to: '/'
-  id: '__root__' | '/'
+  to: '/signin' | '/signup' | '/' | '/chat'
+  id:
+    | '__root__'
+    | '/signin'
+    | '/signup'
+    | '/_main/chat'
+    | '/_main/'
+    | '/_main/chat/'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
-  IndexRoute: typeof IndexRoute
+  SigninRoute: typeof SigninRoute
+  SignupRoute: typeof SignupRoute
+  MainChatRouteRoute: typeof MainChatRouteRouteWithChildren
+  MainIndexRoute: typeof MainIndexRoute
 }
 
 declare module '@tanstack/react-router' {
   interface FileRoutesByPath {
-    '/': {
-      id: '/'
+    '/signup': {
+      id: '/signup'
+      path: '/signup'
+      fullPath: '/signup'
+      preLoaderRoute: typeof SignupRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/signin': {
+      id: '/signin'
+      path: '/signin'
+      fullPath: '/signin'
+      preLoaderRoute: typeof SigninRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/_main/': {
+      id: '/_main/'
       path: '/'
       fullPath: '/'
-      preLoaderRoute: typeof IndexRouteImport
+      preLoaderRoute: typeof MainIndexRouteImport
       parentRoute: typeof rootRouteImport
+    }
+    '/_main/chat': {
+      id: '/_main/chat'
+      path: '/chat'
+      fullPath: '/chat'
+      preLoaderRoute: typeof MainChatRouteRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/_main/chat/': {
+      id: '/_main/chat/'
+      path: '/'
+      fullPath: '/chat/'
+      preLoaderRoute: typeof MainChatIndexRouteImport
+      parentRoute: typeof MainChatRouteRoute
     }
   }
 }
 
+interface MainChatRouteRouteChildren {
+  MainChatIndexRoute: typeof MainChatIndexRoute
+}
+
+const MainChatRouteRouteChildren: MainChatRouteRouteChildren = {
+  MainChatIndexRoute: MainChatIndexRoute,
+}
+
+const MainChatRouteRouteWithChildren = MainChatRouteRoute._addFileChildren(
+  MainChatRouteRouteChildren,
+)
+
 const rootRouteChildren: RootRouteChildren = {
-  IndexRoute: IndexRoute,
+  SigninRoute: SigninRoute,
+  SignupRoute: SignupRoute,
+  MainChatRouteRoute: MainChatRouteRouteWithChildren,
+  MainIndexRoute: MainIndexRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
