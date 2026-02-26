@@ -1,9 +1,11 @@
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
+import type { User } from 'better-auth';
 import type { ReactNode } from 'react';
 
 let context:
   | {
       queryClient: QueryClient;
+      user: User | null;
     }
   | undefined;
 
@@ -16,6 +18,7 @@ export function getContext() {
 
   context = {
     queryClient,
+    user: null,
   };
 
   return context;

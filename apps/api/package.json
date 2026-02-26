@@ -1,6 +1,7 @@
 {
-	"name": "api",
+	"name": "@repo/api",
 	"version": "1.0.50",
+	"private": true,
 	"scripts": {
 		"test": "echo \"Error: no test specified\" && exit 1",
 		"dev": "bun run --watch src/index.ts",
@@ -31,5 +32,8 @@
 		"drizzle-kit": "^0.31.9",
 		"tsx": "^4.21.0"
 	},
-	"module": "src/index.ts"
+	"module": "src/index.ts",
+	"exports": {
+		"./types": "./src/types.ts"
+	}
 }
