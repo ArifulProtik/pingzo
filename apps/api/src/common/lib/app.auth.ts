@@ -2,9 +2,11 @@ import { betterAuth } from 'better-auth'
 import { drizzleAdapter } from 'better-auth/adapters/drizzle'
 import { username } from 'better-auth/plugins'
 import { v7 as uuidv7 } from 'uuid'
+import { config } from '../config'
 import { db } from '../database'
 
 export const auth = betterAuth({
+  trustedOrigins: config.CORS_ORIGIN,
   database: drizzleAdapter(db, {
     provider: 'pg',
   }),

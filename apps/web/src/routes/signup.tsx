@@ -1,4 +1,4 @@
-import { createFileRoute, Link, redirect } from '@tanstack/react-router';
+import { createFileRoute, redirect } from '@tanstack/react-router';
 import SignupForm from '@/components/auth/signup-form';
 import Footer from '@/components/shared/footer';
 import Logo from '@/components/shared/logo';
@@ -11,6 +11,15 @@ export const Route = createFileRoute('/signup')({
       });
     }
   },
+  head: () => ({
+    meta: [
+      {
+        name: 'description',
+        content: 'Sign up for PingZo',
+      },
+      { title: 'Sign Up - PingZo' },
+    ],
+  }),
   component: RouteComponent,
 });
 

@@ -1,6 +1,6 @@
 import { zodResolver } from '@hookform/resolvers/zod';
-import { Link } from '@tanstack/react-router';
-import { useEffect } from 'react';
+import { Link, useRouter } from '@tanstack/react-router';
+import { useEffect, useState } from 'react';
 import { useForm, useWatch } from 'react-hook-form';
 import type { z } from 'zod';
 import { Button } from '@/components/ui/button';
@@ -20,12 +20,14 @@ import {
 import { Input } from '@/components/ui/input';
 import { useUsernameAvailability } from '@/hooks/use-checkusername';
 import { useDebounce } from '@/hooks/use-debounce';
+import { authClient } from '@/lib/auth-client';
 import { signupSchema } from '@/utils/zod-schema';
 
 type FormValues = z.infer<typeof signupSchema>;
 export default function SignupForm({
   ...props
 }: React.ComponentProps<typeof Card>) {
+  const [submitError, setSubmitError] = useState<string | undefined>(undefined);
   const {
     register,
     handleSubmit,
@@ -65,9 +67,21 @@ export default function SignupForm({
       clearErrors('username');
     }
   }, [debouncedUsername, isAvailable, setError, clearErrors]);
+  const router = useRouter();
 
   const onSubmit = async (data: FormValues) => {
-    console.log(data);
+    const { data: res, error } = await authClient.signUp.email({
+      email: data.email,
+      password: data.password,
+      name: data.name,
+      username: data.username,
+    });
+    if (error) {
+      setSubmitError(error.message);
+    }
+    if (res) {
+      router.navigate({ to: '/', replace: true });
+    }
   };
 
   return (
@@ -79,6 +93,11 @@ export default function SignupForm({
         </CardDescription>
       </CardHeader>
       <CardContent>
+        {submitError && (
+          <div className="mb-4 text-center text-destructive/80">
+            {submitError}
+          </div>
+        )}
         <form onSubmit={handleSubmit(onSubmit)}>
           <FieldGroup>
             <Field>
