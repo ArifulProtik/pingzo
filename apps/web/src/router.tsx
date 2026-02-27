@@ -5,14 +5,11 @@ import { getContext } from './utils/root-provider';
 export function getRouter() {
   const router = createTanStackRouter({
     routeTree,
-
     context: getContext(),
-
-    scrollRestoration: true,
+    scrollRestoration: false,
     defaultPreload: 'intent',
     defaultPreloadStaleTime: 0,
   });
-
   return router;
 }
 
