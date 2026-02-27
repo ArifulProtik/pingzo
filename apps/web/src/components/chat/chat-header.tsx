@@ -12,7 +12,7 @@ export function ChatHeader({ user, onToggleInfo }: ChatHeaderProps) {
   return (
     <div className="flex items-center justify-between px-6 py-4 border-b border-border">
       <div className="flex items-center gap-3">
-        <div className="relative flex-shrink-0">
+        <div className="relative shrink-0">
           <Avatar className="h-10 w-10">
             <AvatarImage
               src={user.avatar}
@@ -40,7 +40,7 @@ export function ChatHeader({ user, onToggleInfo }: ChatHeaderProps) {
           aria-label="Start voice call"
           className="hover:bg-accent"
         >
-          <IconPhone className="h-5 w-5" />
+          <IconPhone className="h-10 w-10" />
         </Button>
         <Button
           variant="ghost"
@@ -48,7 +48,7 @@ export function ChatHeader({ user, onToggleInfo }: ChatHeaderProps) {
           aria-label="Start video call"
           className="hover:bg-accent"
         >
-          <IconVideo className="h-5 w-5" />
+          <IconVideo className="h-10 w-10" />
         </Button>
         <Button
           variant="ghost"
@@ -57,7 +57,7 @@ export function ChatHeader({ user, onToggleInfo }: ChatHeaderProps) {
           aria-label="Toggle conversation info"
           className="hover:bg-accent"
         >
-          <IconInfoCircle className="h-5 w-5" />
+          <IconInfoCircle className="h-10 w-10" />
         </Button>
       </div>
     </div>

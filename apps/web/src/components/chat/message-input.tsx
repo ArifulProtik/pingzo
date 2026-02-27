@@ -1,7 +1,7 @@
-import { IconMoodSmile, IconPaperclip, IconSend } from '@tabler/icons-react';
+import { IconMoodSmile, IconPaperclip, IconSend2 } from '@tabler/icons-react';
 import { type KeyboardEvent, useState } from 'react';
 import { Button } from '@/components/ui/button';
-import { Textarea } from '@/components/ui/textarea';
+import { Input } from '../ui/input';
 
 interface MessageInputProps {
   onSendMessage: (content: string) => void;
@@ -18,7 +18,7 @@ export function MessageInput({ onSendMessage }: MessageInputProps) {
     }
   };
 
-  const handleKeyDown = (e: KeyboardEvent<HTMLTextAreaElement>) => {
+  const handleKeyDown = (e: KeyboardEvent<HTMLInputElement>) => {
     // Enter without Shift sends the message
     if (e.key === 'Enter' && !e.shiftKey) {
       e.preventDefault();
@@ -48,7 +48,7 @@ export function MessageInput({ onSendMessage }: MessageInputProps) {
           <IconMoodSmile />
         </Button>
 
-        <Textarea
+        <Input
           value={message}
           onChange={(e) => setMessage(e.target.value)}
           onKeyDown={handleKeyDown}
@@ -62,7 +62,7 @@ export function MessageInput({ onSendMessage }: MessageInputProps) {
           size="icon"
           aria-label="Send message"
         >
-          <IconSend />
+          <IconSend2 />
         </Button>
       </div>
     </div>

@@ -12,19 +12,6 @@ interface UserInfoSidebarProps {
 export function UserInfoSidebar({ user, onClose }: UserInfoSidebarProps) {
   return (
     <div className="w-[320px] border-l border-border bg-card flex flex-col h-full">
-      {/* Header */}
-      <div className="flex items-center justify-between px-6 py-4 border-b border-border">
-        <h2 className="font-semibold text-sm">Contact Info</h2>
-        <Button
-          variant="ghost"
-          size="icon"
-          onClick={onClose}
-          aria-label="Close user info"
-        >
-          <IconX className="h-5 w-5" />
-        </Button>
-      </div>
-
       {/* User Profile */}
       <div className="flex flex-col items-center py-8 px-6">
         <div className="relative">

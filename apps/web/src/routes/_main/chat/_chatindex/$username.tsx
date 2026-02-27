@@ -7,7 +7,7 @@ import { UserInfoSidebar } from '@/components/chat/user-info-sidebar';
 import { CURRENT_USER_ID, getConversationByUsername } from '@/data/mock-chats';
 import type { Message } from '@/types/chat';
 
-export const Route = createFileRoute('/_main/chat/$username')({
+export const Route = createFileRoute('/_main/chat/_chatindex/$username')({
   component: RouteComponent,
 });
 

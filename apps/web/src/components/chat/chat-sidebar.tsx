@@ -62,7 +62,7 @@ export function ChatSidebar() {
       <Separator />
 
       {/* Message Requests section */}
-      <div className="px-4 py-3 flex items-center justify-between hover:bg-accent transition-colors cursor-pointer">
+      {/* <div className="px-4 py-3 flex items-center justify-between hover:bg-accent transition-colors cursor-pointer">
         <span className="text-sm font-medium">Message Requests</span>
         <Badge
           variant="secondary"
@@ -70,11 +70,12 @@ export function ChatSidebar() {
         >
           2
         </Badge>
-      </div>
+      </div> */}
 
       <Separator />
 
       {/* Conversations list */}
+      <span className="text-base font-medium px-4 py-2">Conversations</span>
       <ScrollArea className="flex-1">
         {sortedConversations.length === 0 && searchQuery && (
           <div className="p-4 text-center text-muted-foreground text-sm">
