@@ -7,6 +7,7 @@ import {
 } from '@tanstack/react-router';
 import { TanStackRouterDevtoolsPanel } from '@tanstack/react-router-devtools';
 import NotFound from '@/components/shared/not-found';
+import { Toaster } from '@/components/ui/sonner';
 import { getSession } from '@/data/get-session';
 import type { User } from '@/lib/auth-client';
 import appCss from '../styles.css?url';
@@ -63,7 +64,7 @@ function RootDocument({ children }: { children: React.ReactNode }) {
       <body>
         <TanStackQueryProvider>
           {children}
-          <TanStackDevtools
+          {/* <TanStackDevtools
             config={{
               position: 'bottom-right',
             }}
@@ -74,8 +75,9 @@ function RootDocument({ children }: { children: React.ReactNode }) {
               },
               TanStackQueryDevtools,
             ]}
-          />
+          /> */}
         </TanStackQueryProvider>
+        <Toaster />
         <Scripts />
       </body>
     </html>

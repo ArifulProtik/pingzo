@@ -5,5 +5,6 @@
     "source.fixAll.biome": "explicit"
   },
   "prettier.enable": false,
-  "eslint.enable": false
+  "eslint.enable": false,
+  "kiroAgent.configureMCP": "Disabled"
 }
