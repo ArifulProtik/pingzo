@@ -1,1 +1,1 @@
-export * from './auth'
+export type { App } from '@repo/api/types'

@@ -1,14 +1,14 @@
 import { and, DrizzleError, eq, ne, or } from 'drizzle-orm'
 import { alias, unionAll } from 'drizzle-orm/pg-core'
-import { db } from '@/common/database'
-import { user } from '@/common/database/schema'
-import { friend } from '@/common/database/schema/friend'
+import { db } from '../../common/database'
+import { user } from '../../common/database/schema'
+import { friend } from '../../common/database/schema/friend'
 import {
   BadRequestError,
   ConflictError,
   InternalServerError,
-} from '@/common/error.type'
-import { appLogger } from '@/common/lib/app.logger'
+} from '../../common/error.type'
+import { appLogger } from '../../common/lib/app.logger'
 import type { acceptOrrejectBody } from './friend.model'
 
 const getCanonicalPair = (userA: string, userB: string) =>

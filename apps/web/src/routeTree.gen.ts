@@ -13,6 +13,7 @@ import { Route as SignupRouteImport } from './routes/signup'
 import { Route as SigninRouteImport } from './routes/signin'
 import { Route as MainIndexRouteImport } from './routes/_main/index'
 import { Route as MainChatRouteRouteImport } from './routes/_main/chat/route'
+import { Route as MainChatFriendsRouteImport } from './routes/_main/chat/friends'
 import { Route as MainChatChatindexRouteRouteImport } from './routes/_main/chat/_chatindex/route'
 import { Route as MainChatChatindexIndexRouteImport } from './routes/_main/chat/_chatindex/index'
 import { Route as MainChatChatindexUsernameRouteImport } from './routes/_main/chat/_chatindex/$username'
@@ -37,6 +38,11 @@ const MainChatRouteRoute = MainChatRouteRouteImport.update({
   path: '/chat',
   getParentRoute: () => rootRouteImport,
 } as any)
+const MainChatFriendsRoute = MainChatFriendsRouteImport.update({
+  id: '/friends',
+  path: '/friends',
+  getParentRoute: () => MainChatRouteRoute,
+} as any)
 const MainChatChatindexRouteRoute = MainChatChatindexRouteRouteImport.update({
   id: '/_chatindex',
   getParentRoute: () => MainChatRouteRoute,
@@ -58,6 +64,7 @@ export interface FileRoutesByFullPath {
   '/signup': typeof SignupRoute
   '/chat': typeof MainChatChatindexRouteRouteWithChildren
   '/': typeof MainIndexRoute
+  '/chat/friends': typeof MainChatFriendsRoute
   '/chat/$username': typeof MainChatChatindexUsernameRoute
   '/chat/': typeof MainChatChatindexIndexRoute
 }
@@ -66,6 +73,7 @@ export interface FileRoutesByTo {
   '/signup': typeof SignupRoute
   '/chat': typeof MainChatChatindexIndexRoute
   '/': typeof MainIndexRoute
+  '/chat/friends': typeof MainChatFriendsRoute
   '/chat/$username': typeof MainChatChatindexUsernameRoute
 }
 export interface FileRoutesById {
@@ -75,6 +83,7 @@ export interface FileRoutesById {
   '/_main/chat': typeof MainChatRouteRouteWithChildren
   '/_main/': typeof MainIndexRoute
   '/_main/chat/_chatindex': typeof MainChatChatindexRouteRouteWithChildren
+  '/_main/chat/friends': typeof MainChatFriendsRoute
   '/_main/chat/_chatindex/$username': typeof MainChatChatindexUsernameRoute
   '/_main/chat/_chatindex/': typeof MainChatChatindexIndexRoute
 }
@@ -85,10 +94,17 @@ export interface FileRouteTypes {
     | '/signup'
     | '/chat'
     | '/'
+    | '/chat/friends'
     | '/chat/$username'
     | '/chat/'
   fileRoutesByTo: FileRoutesByTo
-  to: '/signin' | '/signup' | '/chat' | '/' | '/chat/$username'
+  to:
+    | '/signin'
+    | '/signup'
+    | '/chat'
+    | '/'
+    | '/chat/friends'
+    | '/chat/$username'
   id:
     | '__root__'
     | '/signin'
@@ -96,6 +112,7 @@ export interface FileRouteTypes {
     | '/_main/chat'
     | '/_main/'
     | '/_main/chat/_chatindex'
+    | '/_main/chat/friends'
     | '/_main/chat/_chatindex/$username'
     | '/_main/chat/_chatindex/'
   fileRoutesById: FileRoutesById
@@ -136,6 +153,13 @@ declare module '@tanstack/react-router' {
       fullPath: '/chat'
       preLoaderRoute: typeof MainChatRouteRouteImport
       parentRoute: typeof rootRouteImport
+    }
+    '/_main/chat/friends': {
+      id: '/_main/chat/friends'
+      path: '/friends'
+      fullPath: '/chat/friends'
+      preLoaderRoute: typeof MainChatFriendsRouteImport
+      parentRoute: typeof MainChatRouteRoute
     }
     '/_main/chat/_chatindex': {
       id: '/_main/chat/_chatindex'
@@ -179,10 +203,12 @@ const MainChatChatindexRouteRouteWithChildren =
 
 interface MainChatRouteRouteChildren {
   MainChatChatindexRouteRoute: typeof MainChatChatindexRouteRouteWithChildren
+  MainChatFriendsRoute: typeof MainChatFriendsRoute
 }
 
 const MainChatRouteRouteChildren: MainChatRouteRouteChildren = {
   MainChatChatindexRouteRoute: MainChatChatindexRouteRouteWithChildren,
+  MainChatFriendsRoute: MainChatFriendsRoute,
 }
 
 const MainChatRouteRouteWithChildren = MainChatRouteRoute._addFileChildren(

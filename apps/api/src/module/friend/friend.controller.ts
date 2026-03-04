@@ -1,5 +1,5 @@
-import { Elysia, t } from 'elysia'
-import { authMiddleware } from '@/common/middleware/auth.middleware'
+import { Elysia } from 'elysia'
+import { authMiddleware } from '../../common/middleware/auth.middleware'
 import { acceptOrrejectBody, sendRequestBody } from './friend.model'
 import {
   createFriend,
@@ -8,7 +8,12 @@ import {
   updateFriend,
 } from './friend.service'
 
-export const friendController = new Elysia({ prefix: '/friend' })
+export const friendController = new Elysia({
+  prefix: '/friend',
+  detail: {
+    tags: ['Friend'],
+  },
+})
   .use(authMiddleware)
   .post(
     '/send',
@@ -22,9 +27,6 @@ export const friendController = new Elysia({ prefix: '/friend' })
     {
       isAuth: true,
       body: sendRequestBody,
-      detail: {
-        tags: ['Friend'],
-      },
     },
   )
   .post(
@@ -39,9 +41,6 @@ export const friendController = new Elysia({ prefix: '/friend' })
     {
       isAuth: true,
       body: acceptOrrejectBody,
-      detail: {
-        tags: ['Friend'],
-      },
     },
   )
   .get(
@@ -53,7 +52,7 @@ export const friendController = new Elysia({ prefix: '/friend' })
         data,
       }
     },
-    { isAuth: true, detail: { tags: ['Friend'] } },
+    { isAuth: true },
   )
   .get(
     '/pending',
@@ -64,5 +63,5 @@ export const friendController = new Elysia({ prefix: '/friend' })
         data,
       }
     },
-    { isAuth: true, detail: { tags: ['Friend'] } },
+    { isAuth: true },
   )

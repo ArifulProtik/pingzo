@@ -2,12 +2,12 @@ import { createRouter as createTanStackRouter } from '@tanstack/react-router';
 import { routeTree } from './routeTree.gen';
 import { getContext } from './utils/root-provider';
 
-export function getRouter() {
+export async function getRouter() {
   const router = createTanStackRouter({
     routeTree,
     context: getContext(),
     scrollRestoration: false,
-    defaultPreload: 'intent',
+    defaultPreload: false,
     defaultPreloadStaleTime: 0,
   });
   return router;

@@ -3,11 +3,16 @@ import {
   IconMessage,
   IconUsers,
 } from '@tabler/icons-react';
+import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { Link, useMatchRoute, useRouter } from '@tanstack/react-router';
 import { toast } from 'sonner';
+import { QUERY_KEYS } from '@/data/query-keys';
 import { useUser } from '@/hooks/use-user';
+import { client } from '@/lib/api';
 import { authClient } from '@/lib/auth-client';
+import { useFriendStore } from '@/stores/use-friend-store';
 import { Avatar, AvatarFallback, AvatarImage } from '../ui/avatar';
+import { Badge } from '../ui/badge';
 import { Button } from '../ui/button';
 import { Popover, PopoverContent, PopoverTrigger } from '../ui/popover';
 
@@ -16,10 +21,30 @@ export function GlobalSidebar() {
 
   // Check if current route matches /chat or /chat/:username
   const isChatActive =
-    matchRoute({ to: '/chat' }) || matchRoute({ to: '/chat/$username' });
+    matchRoute({ to: '/chat' }) ||
+    (matchRoute({ to: '/chat/$username' }) &&
+      !matchRoute({ to: '/chat/friends' }));
+
+  const isFriendActive = matchRoute({ to: '/chat/friends' });
 
   const user = useUser();
   const router = useRouter();
+  const queryClient = useQueryClient();
+
+  const { setPendingRequests, pendingCount } = useFriendStore();
+
+  useQuery({
+    queryKey: QUERY_KEYS.PENDING_FRIENDS(),
+    queryFn: async () => {
+      const res = await client.api.friend.pending.get();
+      if (res.data?.success) {
+        setPendingRequests(res.data.data);
+      }
+      return res.data;
+    },
+    refetchInterval: 10000, // Poll every 10 seconds
+    enabled: Boolean(user), // Only poll when logged in
+  });
 
   const handleLogout = async () => {
     const res = await authClient.signOut();
@@ -27,6 +52,7 @@ export function GlobalSidebar() {
       toast.error(res.error.message);
     }
     if (res.data?.success) {
+      queryClient.removeQueries({ queryKey: QUERY_KEYS.SESSION() });
       router.invalidate();
       toast.success('Logged out successfully');
     }
@@ -66,37 +92,38 @@ export function GlobalSidebar() {
           />
         </Link>
 
-        <button
-          type="button"
-          className="p-3 rounded-lg text-sidebar-foreground hover:bg-sidebar-accent hover:text-sidebar-accent-foreground transition-colors"
-          aria-label="Friends"
+        <Link
+          to="/chat/friends"
+          className={`relative p-3 rounded-lg transition-colors ${
+            isFriendActive
+              ? 'bg-primary/10 border-primary border text-sidebar-accent-foreground'
+              : 'text-sidebar-foreground hover:bg-sidebar-accent hover:text-sidebar-accent-foreground'
+          }`}
+          aria-label={
+            pendingCount > 0
+              ? `Friends, ${pendingCount} pending request${pendingCount > 1 ? 's' : ''}`
+              : 'Friends'
+          }
         >
           <IconUsers
             size={24}
             stroke={1.5}
           />
-        </button>
+          {pendingCount > 0 && (
+            <Badge
+              variant="destructive"
+              className="absolute -top-1 -right-1 h-5 min-w-5 flex items-center justify-center p-1 text-xs"
+              aria-hidden="true"
+            >
+              {pendingCount > 99 ? '99+' : pendingCount}
+            </Badge>
+          )}
+        </Link>
       </div>
-
-      {/* Settings icon aligned to bottom */}
-      <div className="mt-auto">
-        <Popover>
-          <PopoverTrigger>
-            <Avatar>
-              <AvatarImage
-                src={
-                  user?.image ||
-                  `https://api.dicebear.com/7.x/avataaars/svg?seed=${user.username}`
-                }
-              />
-              <AvatarFallback>U</AvatarFallback>
-            </Avatar>
-          </PopoverTrigger>
-          <PopoverContent
-            align="end"
-            side="right"
-          >
-            <div className="flex items-center gap-2">
+      {user && (
+        <div className="mt-auto">
+          <Popover>
+            <PopoverTrigger>
               <Avatar>
                 <AvatarImage
                   src={
@@ -106,28 +133,44 @@ export function GlobalSidebar() {
                 />
                 <AvatarFallback>U</AvatarFallback>
               </Avatar>
-              <div className="flex flex-col">
-                <span className="text-base font-medium">{user.name}</span>
-                <span className="text-xs text-muted-foreground">
-                  @{user.username}
-                </span>
-                <span className="text-xs text-muted-foreground">
-                  {user.email}
-                </span>
+            </PopoverTrigger>
+            <PopoverContent
+              align="end"
+              side="right"
+            >
+              <div className="flex items-center gap-2">
+                <Avatar>
+                  <AvatarImage
+                    src={
+                      user?.image ||
+                      `https://api.dicebear.com/7.x/avataaars/svg?seed=${user.username}`
+                    }
+                  />
+                  <AvatarFallback>U</AvatarFallback>
+                </Avatar>
+                <div className="flex flex-col">
+                  <span className="text-base font-medium">{user.name}</span>
+                  <span className="text-xs text-muted-foreground">
+                    @{user.username}
+                  </span>
+                  <span className="text-xs text-muted-foreground">
+                    {user.email}
+                  </span>
+                </div>
+                <div className="ml-auto">
+                  <Button
+                    variant={'destructive'}
+                    className="cursor-pointer"
+                    onClick={handleLogout}
+                  >
+                    Logout
+                  </Button>
+                </div>
               </div>
-              <div className="ml-auto">
-                <Button
-                  variant={'destructive'}
-                  className="cursor-pointer"
-                  onClick={handleLogout}
-                >
-                  Logout
-                </Button>
-              </div>
-            </div>
-          </PopoverContent>
-        </Popover>
-      </div>
+            </PopoverContent>
+          </Popover>
+        </div>
+      )}
     </nav>
   );
 }

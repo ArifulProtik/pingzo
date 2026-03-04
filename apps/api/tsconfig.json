@@ -9,10 +9,5 @@
     "strict": true,
     "skipLibCheck": true,
     "baseUrl": "./",
-    "paths": {
-      "@/*": [
-        "./src/*"
-      ]
-    }
-  }
+  },
 }

@@ -1,5 +1,5 @@
 import { Elysia } from 'elysia'
-import { auth } from '@/common/lib/app.auth'
+import { auth } from '../../common/lib/app.auth'
 
 export const authModule = new Elysia({ prefix: '/auth' })
   .post('/sign-up/email', ({ request }) => auth.handler(request), {
