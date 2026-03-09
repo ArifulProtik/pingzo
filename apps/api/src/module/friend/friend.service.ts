@@ -1,5 +1,5 @@
-import { and, DrizzleError, eq, ne, or } from 'drizzle-orm'
-import { alias, unionAll } from 'drizzle-orm/pg-core'
+import { and, DrizzleError, eq, ne, or, sql } from 'drizzle-orm'
+import { alias } from 'drizzle-orm/pg-core'
 import { db } from '../../common/database'
 import { user } from '../../common/database/schema'
 import { friend } from '../../common/database/schema/friend'
@@ -9,6 +9,7 @@ import {
   InternalServerError,
 } from '../../common/error.type'
 import { appLogger } from '../../common/lib/app.logger'
+import { webSocketService } from '../ws/ws.service'
 import type { acceptOrrejectBody } from './friend.model'
 
 const getCanonicalPair = (userA: string, userB: string) =>
@@ -16,133 +17,172 @@ const getCanonicalPair = (userA: string, userB: string) =>
     ? { userOneId: userA, userTwoId: userB }
     : { userOneId: userB, userTwoId: userA }
 
-export const createFriend = async (requesterID: string, targetID: string) => {
-  if (requesterID === targetID) {
-    throw new BadRequestError('You cannot friend yourself')
-  }
-
-  const { userOneId, userTwoId } = getCanonicalPair(requesterID, targetID)
-
-  const existing = await db.query.friend.findFirst({
-    where: (f, { and, eq }) =>
-      and(eq(f.userOneId, userOneId), eq(f.userTwoId, userTwoId)),
-  })
-
-  if (existing) {
-    throw new ConflictError('Friend request already exists')
-  }
-
-  try {
-    const inserted = await db
-      .insert(friend)
-      .values({
-        userOneId,
-        userTwoId,
-        actionUserId: requesterID,
-      })
-      .returning()
-
-    return inserted[0]
-  } catch (error) {
-    if (error instanceof DrizzleError) {
-      appLogger.error({ error }, '[friend_service]')
-      throw new InternalServerError('Database error', error)
+export class FriendService {
+  async createFriend(requesterID: string, targetID: string) {
+    if (requesterID === targetID) {
+      throw new BadRequestError('You cannot friend yourself')
     }
-    throw error
-  }
-}
 
-export const updateFriend = async (
-  body: acceptOrrejectBody,
-  actorID: string,
-) => {
-  const { userOneId, userTwoId } = getCanonicalPair(actorID, body.target_id)
-  try {
+    const { userOneId, userTwoId } = getCanonicalPair(requesterID, targetID)
+
     const existing = await db.query.friend.findFirst({
       where: (f, { and, eq }) =>
-        and(
-          eq(f.userOneId, userOneId),
-          eq(f.userTwoId, userTwoId),
-          eq(f.status, 'pending'),
-        ),
+        and(eq(f.userOneId, userOneId), eq(f.userTwoId, userTwoId)),
     })
-    if (!existing) throw new BadRequestError('Friend request not found')
-    await db.update(friend).set({ status: body.action, actionUserId: actorID })
-  } catch (e) {
-    appLogger.error(
-      { error: e },
-      '[friend_service] Failed to update friend status',
-    )
-    throw new BadRequestError('Failed to update friend status')
+
+    if (existing) {
+      throw new ConflictError('Friend request already exists')
+    }
+
+    try {
+      const inserted = await db
+        .insert(friend)
+        .values({
+          userOneId,
+          userTwoId,
+          actionUserId: requesterID,
+        })
+        .returning()
+
+      return inserted[0]
+    } catch (error) {
+      if (error instanceof DrizzleError) {
+        appLogger.error({ error }, '[friend_service]')
+        throw new InternalServerError('Database error', error)
+      }
+      throw error
+    }
   }
-}
-const friendUser = alias(user, 'friendUser')
-export const getFriendList = async (userID: string) => {
-  try {
-    const asUserOne = db
-      .select({
-        id: friendUser.id,
-        name: friendUser.name,
-        username: friendUser.username,
-        image: friendUser.image,
-      })
-      .from(friend)
-      .innerJoin(friendUser, eq(friend.userTwoId, friendUser.id))
-      .where(and(eq(friend.userOneId, userID), eq(friend.status, 'accepted')))
 
-    const asUserTwo = db
-      .select({
-        id: friendUser.id,
-        name: friendUser.name,
-        username: friendUser.username,
-        image: friendUser.image,
+  async updateFriend(body: acceptOrrejectBody, actorID: string) {
+    const { userOneId, userTwoId } = getCanonicalPair(actorID, body.target_id)
+    try {
+      const existing = await db.query.friend.findFirst({
+        where: (f, { and, eq }) =>
+          and(
+            eq(f.userOneId, userOneId),
+            eq(f.userTwoId, userTwoId),
+            eq(f.status, 'pending'),
+          ),
       })
-      .from(friend)
-      .innerJoin(friendUser, eq(friend.userOneId, friendUser.id))
-      .where(and(eq(friend.userTwoId, userID), eq(friend.status, 'accepted')))
-
-    const userlist = await unionAll(asUserOne, asUserTwo)
-    return userlist
-  } catch (e) {
-    appLogger.error({ error: e }, '[friend_service] Failed to get friend list')
-    throw new BadRequestError('Failed to get friend list')
-  }
-}
-
-export const getIcomingFriendRequests = async (userID: string) => {
-  try {
-    const rows = await db
-      .select({
-        friend_id: friend.id,
-        senderId: user.id,
-        username: user.username,
-        name: user.name,
-        image: user.image,
-      })
-      .from(friend)
-      .innerJoin(user, eq(user.id, friend.actionUserId))
-      .where(
-        and(
-          eq(friend.status, 'pending'),
-          ne(friend.actionUserId, userID),
-          or(eq(friend.userOneId, userID), eq(friend.userTwoId, userID)),
-        ),
+      if (!existing) throw new BadRequestError('Friend request not found')
+      await db
+        .update(friend)
+        .set({ status: body.action, actionUserId: actorID })
+    } catch (e) {
+      appLogger.error(
+        { error: e },
+        '[friend_service] Failed to update friend status',
       )
+      throw new BadRequestError('Failed to update friend status')
+    }
+  }
 
-    return rows.map((r) => ({
-      friendship_id: r.friend_id,
-      user: {
-        id: r.senderId,
-        username: r.username,
-        name: r.name,
-        image: r.image,
-      },
-    }))
-  } catch (e) {
-    appLogger.error(
-      { error: e },
-      '[friend_service] Failed to get incoming friend requests',
-    )
-    throw new BadRequestError('Failed to get incoming friend requests')
+  async getFriendList(userID: string) {
+    try {
+      const friendId = sql<string>`
+        CASE
+          WHEN ${friend.userOneId} = ${userID} THEN ${friend.userTwoId}
+          ELSE ${friend.userOneId}
+        END
+      `
+
+      const rows = await db
+        .select({
+          id: user.id,
+          name: user.name,
+          username: user.username,
+          image: user.image,
+        })
+        .from(friend)
+        .innerJoin(user, eq(user.id, friendId))
+        .where(
+          and(
+            eq(friend.status, 'accepted'),
+            or(eq(friend.userOneId, userID), eq(friend.userTwoId, userID)),
+          ),
+        )
+
+      const usersWithPresence = rows.map((u) => ({
+        ...u,
+        isOnline: webSocketService.isOnline(u.id),
+      }))
+
+      return usersWithPresence
+    } catch (e) {
+      appLogger.error(
+        { error: e },
+        '[friend_service] Failed to get friend list',
+      )
+      throw new BadRequestError('Failed to get friend list')
+    }
+  }
+
+  async getIcomingFriendRequests(userID: string) {
+    try {
+      const rows = await db
+        .select({
+          friend_id: friend.id,
+          senderId: user.id,
+          username: user.username,
+          name: user.name,
+          image: user.image,
+        })
+        .from(friend)
+        .innerJoin(user, eq(user.id, friend.actionUserId))
+        .where(
+          and(
+            eq(friend.status, 'pending'),
+            ne(friend.actionUserId, userID),
+            or(eq(friend.userOneId, userID), eq(friend.userTwoId, userID)),
+          ),
+        )
+
+      return rows.map((r) => ({
+        friendship_id: r.friend_id,
+        user: {
+          id: r.senderId,
+          username: r.username,
+          name: r.name,
+          image: r.image,
+        },
+      }))
+    } catch (e) {
+      appLogger.error(
+        { error: e },
+        '[friend_service] Failed to get incoming friend requests',
+      )
+      throw new BadRequestError('Failed to get incoming friend requests')
+    }
+  }
+
+  async getFrienduserIDs(userID: string) {
+    const friendUser = alias(user, 'friendUser')
+    try {
+      const rows = await db
+        .select({ friend_id: friend.id, friend_user_id: friendUser.id })
+        .from(friend)
+        .innerJoin(
+          friendUser,
+          or(
+            eq(friend.userOneId, friendUser.id),
+            eq(friend.userTwoId, friendUser.id),
+          ),
+        )
+        .where(
+          and(
+            eq(friend.status, 'accepted'),
+            or(eq(friend.userOneId, userID), eq(friend.userTwoId, userID)),
+          ),
+        )
+      return rows.map((r) => r.friend_user_id)
+    } catch (e) {
+      appLogger.error(
+        { error: e },
+        '[friend_service] Failed to get friend user IDs',
+      )
+      throw new BadRequestError('Failed to get friend user IDs')
+    }
   }
 }
+export const friendService = new FriendService()

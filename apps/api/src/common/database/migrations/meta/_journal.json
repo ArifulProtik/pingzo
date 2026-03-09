@@ -36,6 +36,13 @@
       "when": 1772191416302,
       "tag": "0004_awesome_obadiah_stane",
       "breakpoints": true
+    },
+    {
+      "idx": 5,
+      "version": "7",
+      "when": 1772956222871,
+      "tag": "0005_bouncy_hobgoblin",
+      "breakpoints": true
     }
   ]
 }

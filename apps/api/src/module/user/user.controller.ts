@@ -1,6 +1,6 @@
 import { Elysia, t } from 'elysia'
 import { authMiddleware } from '../../common/middleware/auth.middleware'
-import { searchUsers } from './user.service'
+import { userService } from './user.service'
 
 export const userController = new Elysia({
   prefix: '/user',
@@ -10,7 +10,7 @@ export const userController = new Elysia({
   .get(
     '/search',
     async ({ query, user }) => {
-      const data = await searchUsers(user.id, query.q)
+      const data = await userService.searchUsers(user.id, query.q)
       return { success: true, data }
     },
     {
