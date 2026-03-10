@@ -51,8 +51,10 @@ export default function SignInForm({
     if (res.error) {
       setSubmitError(res.error.message);
     } else {
+      router.invalidate();
       router.navigate({
         to: '/',
+        replace: true,
       });
     }
   };

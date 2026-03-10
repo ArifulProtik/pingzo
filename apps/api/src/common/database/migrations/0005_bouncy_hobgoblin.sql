@@ -1,0 +1,1 @@
+ALTER TABLE "user" ADD COLUMN "lastseen" timestamp with time zone DEFAULT now();

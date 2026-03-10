@@ -13,6 +13,7 @@ export const docsMiddleware = (app: Elysia) =>
         },
         tags: [
           { name: 'Auth', description: 'Authentication With better-auth' },
+          { name: 'Friend', description: 'Friend Management' },
         ],
       },
     }),

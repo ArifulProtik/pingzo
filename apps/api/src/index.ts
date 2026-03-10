@@ -1,6 +1,7 @@
 import { config } from './common/config'
 import { closeDatabase, pingDatabase } from './common/database'
 import { appLogger } from './common/lib/app.logger'
+import { webSocketService } from './module/ws/ws.service'
 import { server } from './server'
 
 let isShuttingDown = false
@@ -47,6 +48,10 @@ const start = async () => {
     appLogger.info('[DB] Database connection successful')
 
     server.listen({ port: config.PORT })
+
+    if (server.server) {
+      webSocketService.setServer(server.server)
+    }
 
     appLogger.info(`[SERVER] Server is running on port ${config.PORT}`)
     appLogger.info(`[ENV] Environment: ${config.NODE_ENV}`)

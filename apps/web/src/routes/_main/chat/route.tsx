@@ -16,11 +16,11 @@ function RouteComponent() {
   return (
     <div className="flex h-screen">
       {/* Global Sidebar - 60px fixed width */}
-      <div className="w-[60px] bg-sidebar border-r border-sidebar-border">
+      <div className="w-15 bg-sidebar border-r border-sidebar-border">
         <GlobalSidebar />
       </div>
 
-      <main className="flex-1 bg-background">
+      <main className="flex-1 bg-background h-full">
         <Outlet />
       </main>
     </div>
