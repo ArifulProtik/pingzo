@@ -164,9 +164,12 @@ export class FriendService {
         .from(friend)
         .innerJoin(
           friendUser,
-          or(
-            eq(friend.userOneId, friendUser.id),
-            eq(friend.userTwoId, friendUser.id),
+          and(
+            or(
+              eq(friend.userOneId, friendUser.id),
+              eq(friend.userTwoId, friendUser.id),
+            ),
+            ne(friendUser.id, userID),
           ),
         )
         .where(
