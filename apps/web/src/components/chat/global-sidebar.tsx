@@ -7,17 +7,19 @@ import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { Link, useMatchRoute, useRouter } from '@tanstack/react-router';
 import { toast } from 'sonner';
 import { QUERY_KEYS } from '@/data/query-keys';
+import { useFriendStore } from '@/hooks/use-friend-store';
 import { useUser } from '@/hooks/use-user';
 import { client } from '@/lib/api';
 import { authClient } from '@/lib/auth-client';
-import { useFriendStore } from '@/stores/use-friend-store';
-import { Avatar, AvatarFallback, AvatarImage } from '../ui/avatar';
+import { wsClient } from '@/lib/ws/ws-client';
+import { Avatar, AvatarBadge, AvatarFallback, AvatarImage } from '../ui/avatar';
 import { Badge } from '../ui/badge';
 import { Button } from '../ui/button';
 import { Popover, PopoverContent, PopoverTrigger } from '../ui/popover';
 
 export function GlobalSidebar() {
   const matchRoute = useMatchRoute();
+  const isOnline = wsClient.isConnected();
 
   // Check if current route matches /chat or /chat/:username
   const isChatActive =
@@ -31,7 +33,8 @@ export function GlobalSidebar() {
   const router = useRouter();
   const queryClient = useQueryClient();
 
-  const { setPendingRequests, pendingCount } = useFriendStore();
+  const setPendingRequests = useFriendStore((s) => s.setPendingRequests);
+  const pendingCount = useFriendStore((s) => s.pendingCount);
 
   useQuery({
     queryKey: QUERY_KEYS.PENDING_FRIENDS(),
@@ -54,6 +57,7 @@ export function GlobalSidebar() {
     if (res.data?.success) {
       queryClient.removeQueries({ queryKey: QUERY_KEYS.SESSION() });
       router.invalidate();
+      wsClient.close();
       toast.success('Logged out successfully');
     }
   };
@@ -131,7 +135,14 @@ export function GlobalSidebar() {
                     `https://api.dicebear.com/7.x/avataaars/svg?seed=${user.username}`
                   }
                 />
-                <AvatarFallback>U</AvatarFallback>
+                <AvatarFallback>
+                  {user?.name?.charAt(0)?.toUpperCase()}
+                </AvatarFallback>
+                {isOnline ? (
+                  <AvatarBadge className="bg-green-500 dark:bg-green-600" />
+                ) : (
+                  <AvatarBadge className="bg-red-500 dark:bg-red-600" />
+                )}
               </Avatar>
             </PopoverTrigger>
             <PopoverContent

@@ -1,7 +1,6 @@
 import { IconSearch } from '@tabler/icons-react';
 import { useMatchRoute } from '@tanstack/react-router';
 import { useState } from 'react';
-import { Badge } from '@/components/ui/badge';
 import { Input } from '@/components/ui/input';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { Separator } from '@/components/ui/separator';

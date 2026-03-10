@@ -1,5 +1,5 @@
 import { Elysia } from 'elysia'
-import { authMiddleware } from 'src/common/middleware/auth.middleware'
+import { authMiddleware } from '../../common/middleware/auth.middleware'
 import { friendService } from '../friend/friend.service'
 import { wsChannelKeys } from './ws.model'
 import { webSocketService } from './ws.service'

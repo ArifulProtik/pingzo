@@ -1,35 +1,79 @@
 import { IconUserOff } from '@tabler/icons-react';
 import { useQuery } from '@tanstack/react-query';
+import { memo, useEffect } from 'react';
 import { QUERY_KEYS } from '@/data/query-keys';
+import { useFriendStore } from '@/hooks/use-friend-store';
 import { client } from '@/lib/api';
+
 import EmptyState from '../shared/empty-state';
-import { Avatar, AvatarFallback, AvatarImage } from '../ui/avatar';
+import { Avatar, AvatarBadge, AvatarFallback, AvatarImage } from '../ui/avatar';
 import { Spinner } from '../ui/spinner';
 
-interface FriendListProps {}
+interface Friend {
+  id: string;
+  name: string;
+  username: string | null;
+  image: string | null;
+}
 
-/**
- * FriendList Component
- * Displays the user's accepted friends with automatic polling
- * Polls every 10 seconds to keep the list up-to-date
- */
-const FriendList = ({}: FriendListProps) => {
+const FriendRow = memo(({ friend }: { friend: Friend }) => {
+  const isOnline = useFriendStore((s) => s.onlineFriendIDS.has(friend.id));
+
+  return (
+    <div className="flex items-center gap-3 rounded-lg border p-3 hover:bg-accent transition-colors">
+      <div className="relative">
+        <Avatar size="lg">
+          <AvatarImage
+            src={
+              friend.image ??
+              `https://api.dicebear.com/7.x/avataaars/svg?seed=${friend.username}`
+            }
+            alt={`${friend.name}'s avatar`}
+          />
+          <AvatarFallback>
+            {friend.name?.slice(0, 2).toUpperCase() || 'U'}
+          </AvatarFallback>
+          {isOnline ? (
+            <AvatarBadge className="bg-green-600 dark:bg-green-800" />
+          ) : (
+            <AvatarBadge className="bg-gray-400 dark:bg-gray-600" />
+          )}
+        </Avatar>
+      </div>
+
+      <div className="flex flex-col text-left">
+        <span className="font-medium text-sm">{friend.name}</span>
+        <span className="text-muted-foreground text-xs">
+          @{friend.username}
+        </span>
+      </div>
+    </div>
+  );
+});
+
+FriendRow.displayName = 'FriendRow';
+
+const FriendList = () => {
+  const setOnlineFriends = useFriendStore((s) => s.setOnlineFriends);
+
   const { data, isLoading } = useQuery({
     queryKey: QUERY_KEYS.FRIEND_LIST(),
     queryFn: async () => {
       const res = await client.api.friend.list.get();
       return res.data;
     },
-    refetchInterval: 10000, // Poll every 10s
   });
+
+  useEffect(() => {
+    if (data?.success) {
+      const friendIDS = data.data.filter((f) => f.isOnline).map((f) => f.id);
+      setOnlineFriends(friendIDS);
+    }
+  }, [data, setOnlineFriends]);
 
   if (isLoading) {
     return (
-      <div
-        className="flex h-full items-center justify-center"
-        role="status"
-        aria-label="Loading friends"
-      >
+      <div className="flex h-full items-center justify-center">
         <Spinner className="size-12 text-muted-foreground" />
       </div>
     );
@@ -50,42 +94,12 @@ const FriendList = ({}: FriendListProps) => {
   }
 
   return (
-    <div
-      className="flex flex-col gap-2 p-4"
-      role="list"
-      aria-label="Friends list"
-    >
-      <div
-        className="text-muted-foreground text-sm mb-2"
-        aria-live="polite"
-      >
-        {data?.data.length} {data?.data.length === 1 ? 'Friend' : 'Friends'}
-      </div>
+    <div className="flex flex-col gap-2 p-4">
       {data?.data.map((friend) => (
-        <div
+        <FriendRow
           key={friend.id}
-          className="flex items-center gap-3 rounded-lg border p-3 hover:bg-accent transition-colors"
-          role="listitem"
-        >
-          <Avatar>
-            <AvatarImage
-              src={
-                friend.image ??
-                `https://api.dicebear.com/7.x/avataaars/svg?seed=${friend.username}`
-              }
-              alt={`${friend.name}'s avatar`}
-            />
-            <AvatarFallback>
-              {friend.name?.slice(0, 2).toUpperCase() || 'U'}
-            </AvatarFallback>
-          </Avatar>
-          <div className="flex flex-col">
-            <span className="font-medium text-sm">{friend.name}</span>
-            <span className="text-muted-foreground text-xs">
-              @{friend.username}
-            </span>
-          </div>
-        </div>
+          friend={friend}
+        />
       ))}
     </div>
   );
