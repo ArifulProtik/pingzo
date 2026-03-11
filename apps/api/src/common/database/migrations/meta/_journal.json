@@ -5,43 +5,8 @@
     {
       "idx": 0,
       "version": "7",
-      "when": 1772008042344,
-      "tag": "0000_right_electro",
-      "breakpoints": true
-    },
-    {
-      "idx": 1,
-      "version": "7",
-      "when": 1772013633654,
-      "tag": "0001_nebulous_gideon",
-      "breakpoints": true
-    },
-    {
-      "idx": 2,
-      "version": "7",
-      "when": 1772188786432,
-      "tag": "0002_spicy_callisto",
-      "breakpoints": true
-    },
-    {
-      "idx": 3,
-      "version": "7",
-      "when": 1772188840423,
-      "tag": "0003_square_captain_universe",
-      "breakpoints": true
-    },
-    {
-      "idx": 4,
-      "version": "7",
-      "when": 1772191416302,
-      "tag": "0004_awesome_obadiah_stane",
-      "breakpoints": true
-    },
-    {
-      "idx": 5,
-      "version": "7",
-      "when": 1772956222871,
-      "tag": "0005_bouncy_hobgoblin",
+      "when": 1773250145343,
+      "tag": "0000_awesome_lionheart",
       "breakpoints": true
     }
   ]

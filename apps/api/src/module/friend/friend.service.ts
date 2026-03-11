@@ -187,5 +187,25 @@ export class FriendService {
       throw new BadRequestError('Failed to get friend user IDs')
     }
   }
+  async isFriend(userID: string, friendID: string) {
+    const { userOneId, userTwoId } = getCanonicalPair(userID, friendID)
+    try {
+      const existing = await db.query.friend.findFirst({
+        where: (f, { and, eq }) =>
+          and(
+            eq(f.userOneId, userOneId),
+            eq(f.userTwoId, userTwoId),
+            eq(f.status, 'accepted'),
+          ),
+      })
+      return Boolean(existing)
+    } catch (e) {
+      appLogger.error(
+        { error: e },
+        '[friend_service] Failed to check if friends',
+      )
+      throw new BadRequestError('Failed to check if friends')
+    }
+  }
 }
 export const friendService = new FriendService()
