@@ -3,7 +3,12 @@ export type WSPresence = {
   isOnline: boolean
 }
 export type WSMessage = {
-  content: string
+  messageId: string
+  conversationId: string
+  senderId: string
+  content: string | null
+  replyToMessageId: string | null
+  createdAt: string
 }
 export type WSEventMap = {
   presence: WSPresence

@@ -1,14 +1,14 @@
-import { IconCheck, IconChecks } from '@tabler/icons-react';
+import { IconCheck } from '@tabler/icons-react';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { cn } from '@/lib/utils';
-import type { Message, User } from '@/types/chat';
+import type { ConversationParticipant, Message } from '@/types/chat';
 import { formatMessageTime } from '@/utils/format-timestamp';
 
 interface MessageItemProps {
   message: Message;
   isSent: boolean;
   showAvatar: boolean;
-  user?: User;
+  user?: ConversationParticipant;
 }
 
 export function MessageItem({
@@ -29,7 +29,7 @@ export function MessageItem({
           {showAvatar && user ? (
             <Avatar className="h-8 w-8">
               <AvatarImage
-                src={user.avatar}
+                src={user.image || undefined}
                 alt={user.name}
               />
               <AvatarFallback>{user.name.charAt(0)}</AvatarFallback>
@@ -61,15 +61,10 @@ export function MessageItem({
 
         <div className="flex items-center gap-1 px-1">
           <span className="text-xs text-muted-foreground">
-            {formatMessageTime(message.timestamp)}
+            {formatMessageTime(new Date(message.createdAt))}
           </span>
-          {isSent && message.isRead && (
-            <IconChecks
-              className="h-3 w-3 text-muted-foreground"
-              aria-label="Read"
-            />
-          )}
-          {isSent && !message.isRead && (
+          {/* Read receipts are handled at the conversation level now, we could pass a isRead prop based on lastReadMessageId */}
+          {isSent && (
             <IconCheck
               className="h-3 w-3 text-muted-foreground"
               aria-label="Sent"

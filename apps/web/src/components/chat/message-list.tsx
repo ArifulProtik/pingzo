@@ -1,13 +1,13 @@
 import { useEffect, useRef } from 'react';
 import { ScrollArea } from '@/components/ui/scroll-area';
-import type { Message, User } from '@/types/chat';
+import type { ConversationParticipant, Message } from '@/types/chat';
 import { formatDateSeparator } from '@/utils/format-timestamp';
 import { MessageItem } from './message-item';
 
 interface MessageListProps {
   messages: Message[];
   currentUserId: string;
-  otherUser: User;
+  otherUser?: ConversationParticipant;
 }
 
 export function MessageList({
@@ -42,7 +42,7 @@ export function MessageList({
     let lastSenderId: string | null = null;
 
     messages.forEach((message) => {
-      const messageDate = new Date(message.timestamp);
+      const messageDate = new Date(message.createdAt);
       const currentDate = messageDate.toDateString();
 
       // Insert date separator if day changed

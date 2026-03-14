@@ -1,15 +1,19 @@
-import { IconX } from '@tabler/icons-react';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Button } from '@/components/ui/button';
 import { Separator } from '@/components/ui/separator';
-import type { User } from '@/types/chat';
+import { useFriendStore } from '@/hooks/use-friend-store';
+import type { ConversationParticipant } from '@/types/chat';
 
 interface UserInfoSidebarProps {
-  user: User;
-  onClose: () => void;
+  user: ConversationParticipant;
+  onClose?: () => void;
 }
 
-export function UserInfoSidebar({ user, onClose }: UserInfoSidebarProps) {
+export function UserInfoSidebar({ user }: UserInfoSidebarProps) {
+  const isOnline = useFriendStore((state) =>
+    state.onlineFriendIDS.has(user.id),
+  );
+
   return (
     <div className="w-[320px] border-l border-border bg-card flex flex-col h-full">
       {/* User Profile */}
@@ -17,21 +21,21 @@ export function UserInfoSidebar({ user, onClose }: UserInfoSidebarProps) {
         <div className="relative">
           <Avatar className="h-24 w-24">
             <AvatarImage
-              src={user.avatar}
+              src={user.image || undefined}
               alt={user.name}
             />
             <AvatarFallback className="text-2xl">
               {user.name.charAt(0)}
             </AvatarFallback>
           </Avatar>
-          {user.isOnline && (
+          {isOnline && (
             <div className="absolute bottom-2 right-2 h-5 w-5 bg-chart-1 border-4 border-background rounded-full" />
           )}
         </div>
 
         <h3 className="mt-4 text-lg font-semibold">{user.name}</h3>
         <p className="text-sm text-muted-foreground">
-          {user.isOnline ? 'Online' : 'Offline'}
+          {isOnline ? 'Online' : 'Offline'}
         </p>
       </div>
 

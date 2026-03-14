@@ -1,5 +1,7 @@
 import type { WSEventMap } from '@repo/contracts';
+import { QUERY_KEYS } from '@/data/query-keys';
 import { useFriendStore } from '@/hooks/use-friend-store';
+import { getContext } from '@/utils/root-provider';
 import { wsClient } from './ws-client';
 
 type WSEventHandlers = {
@@ -14,6 +16,13 @@ const eventHandlers: WSEventHandlers = {
       return;
     }
     store.setOnlineFriendID(userID);
+  },
+  message: (payload) => {
+    const { queryClient } = getContext();
+    queryClient.invalidateQueries({ queryKey: QUERY_KEYS.CONVERSATIONS() });
+    queryClient.invalidateQueries({
+      queryKey: QUERY_KEYS.MESSAGES(payload.conversationId),
+    });
   },
 };
 

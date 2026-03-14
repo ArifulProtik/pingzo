@@ -1,24 +1,19 @@
-export interface User {
-  id: string;
-  username: string;
-  name: string;
-  avatar: string;
-  isOnline: boolean;
-}
+import { client } from '@/lib/api';
 
-export interface Message {
-  id: string;
-  senderId: string;
-  content: string;
-  timestamp: Date;
-  isRead: boolean;
-}
+const getConversationsDummy = async () => {
+  const res = await client.api.chat.conversations.get();
+  if (res.error) throw new Error();
+  return res.data.data;
+};
+export type Conversation = Awaited<ReturnType<typeof getConversationsDummy>>[0];
+export type ConversationParticipant = Conversation['participants'][0];
 
-export interface Conversation {
-  id: string;
-  user: User;
-  messages: Message[];
-  lastMessage: string;
-  timestamp: Date;
-  unreadCount: number;
-}
+const getMessagesDummy = async () => {
+  const res = await client.api.chat.conversation({ id: 'any' }).messages.get();
+  if (res.error) throw new Error();
+  return res.data.data.messages;
+};
+export type Message = Awaited<ReturnType<typeof getMessagesDummy>>[0];
+
+// Alias User to Participant for backward compatibility in components
+export type User = ConversationParticipant;

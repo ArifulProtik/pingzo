@@ -4,6 +4,7 @@ import { Badge } from '@/components/ui/badge';
 import { cn } from '@/lib/utils';
 import type { Conversation } from '@/types/chat';
 import { formatTimestamp } from '@/utils/format-timestamp';
+import { useFriendStore } from '@/hooks/use-friend-store';
 
 interface ConversationItemProps {
   conversation: Conversation;
@@ -14,12 +15,28 @@ export function ConversationItem({
   conversation,
   isActive,
 }: ConversationItemProps) {
-  const { user, lastMessage, timestamp, unreadCount } = conversation;
+  const { participants, lastMessage, unreadCount, isGroup, name, createdAt } = conversation;
+  
+  // For 1:1, we get the other participant
+  const otherUser = participants[0];
+  
+  // Check online status
+  const isOnline = useFriendStore((state) => state.onlineFriendIDS.has(otherUser?.id || ''));
+  
+  // Display details
+  const displayUsername = otherUser?.username || '';
+  const displayName = isGroup ? (name || 'Group Chat') : (otherUser?.name || 'Unknown User');
+  const displayImage = isGroup ? undefined : (otherUser?.image || undefined);
+  
+  // Last message and timestamp
+  const displayLastMessage = lastMessage?.content || 'No messages yet';
+  // Use last message timestamp if exists, else conversation creation time
+  const displayTimestamp = lastMessage?.createdAt ? new Date(lastMessage.createdAt) : new Date(createdAt);
 
   return (
     <Link
       to="/chat/$username"
-      params={{ username: user.username }}
+      params={{ username: displayUsername }}
       className={cn(
         'flex items-center gap-3 px-4 py-3 hover:bg-accent transition-colors',
         isActive && 'bg-accent',
@@ -28,24 +45,24 @@ export function ConversationItem({
       <div className="relative flex-shrink-0">
         <Avatar className="h-12 w-12">
           <AvatarImage
-            src={user.avatar}
-            alt={user.name}
+            src={displayImage}
+            alt={displayName}
           />
-          <AvatarFallback>{user.name.charAt(0)}</AvatarFallback>
+          <AvatarFallback>{displayName.charAt(0)}</AvatarFallback>
         </Avatar>
-        {user.isOnline && (
+        {isOnline && !isGroup && (
           <div className="absolute bottom-0 right-0 h-3 w-3 bg-chart-1 border-2 border-background rounded-full" />
         )}
       </div>
 
       <div className="flex-1 min-w-0">
         <div className="flex items-center justify-between gap-2 mb-1">
-          <h3 className="font-medium text-sm truncate">{user.name}</h3>
+          <h3 className="font-medium text-sm truncate">{displayName}</h3>
           <span className="text-xs text-muted-foreground flex-shrink-0">
-            {formatTimestamp(timestamp)}
+            {formatTimestamp(displayTimestamp)}
           </span>
         </div>
-        <p className="text-sm text-muted-foreground truncate">{lastMessage}</p>
+        <p className="text-sm text-muted-foreground truncate">{displayLastMessage}</p>
       </div>
 
       {unreadCount > 0 && (

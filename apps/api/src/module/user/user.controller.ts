@@ -18,3 +18,14 @@ export const userController = new Elysia({
       query: t.Object({ q: t.String() }),
     },
   )
+  .get(
+    '/username/:username',
+    async ({ params, user }) => {
+      const data = await userService.getUserByUsername(user.id, params.username)
+      return { success: true, data }
+    },
+    {
+      isAuth: true,
+      params: t.Object({ username: t.String() }),
+    },
+  )

@@ -1,9 +1,9 @@
 import { Link } from '@tanstack/react-router';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
-import type { User } from '@/types/chat';
+import type { ConversationParticipant } from '@/types/chat';
 
 interface OnlineFriendsProps {
-  friends: User[];
+  friends: ConversationParticipant[];
 }
 
 export function OnlineFriends({ friends }: OnlineFriendsProps) {
@@ -13,12 +13,12 @@ export function OnlineFriends({ friends }: OnlineFriendsProps) {
         <Link
           key={friend.id}
           to="/chat/$username"
-          params={{ username: friend.username }}
+          params={{ username: friend.username || '' }}
           className="shrink-0 relative focus:outline-none focus:ring-2 focus:ring-ring rounded-full"
         >
           <Avatar className="h-12 w-12">
             <AvatarImage
-              src={friend.avatar}
+              src={friend.image || undefined}
               alt={friend.name}
             />
             <AvatarFallback>{friend.name.charAt(0)}</AvatarFallback>
